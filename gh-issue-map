@@ -4,7 +4,6 @@ set -e
 _input="$1"
 
 # Get the issue URL as $_url. Error if bad input or user lacks access.
-_url=
 if ! _url=$(gh issue view --json url --jq '.url' ${_input}); then
   echo "Error: Unable to retrieve issue details" >&2
   exit 1
@@ -35,8 +34,11 @@ LinkedFrom="$(gh api \
   sort -u)"
 
 # Print the results.
-echo "Links to:"
-printf "%s\n" "${LinksTo}"
-echo
-echo "Linked from:"
-printf "%s\n" "${LinkedFrom}"
+if [ -n "${LinksTo}" ]; then
+  echo "Links to:"
+  printf "%s\n\n" "${LinksTo}"
+fi
+if [ -n "${LinkedFrom}" ]; then
+  echo "Linked from:"
+  printf "%s\n\n" "${LinkedFrom}"
+fi
