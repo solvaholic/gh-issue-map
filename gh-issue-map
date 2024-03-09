@@ -1,35 +1,42 @@
 #!/usr/bin/env bash
 set -e
 
-echo "Hello gh-issue-map!"
+_input="$1"
 
-# Snippets to help get started:
+# Get the issue URL as $_url. Error if bad input or user lacks access.
+_url=
+if ! _url=$(gh issue view --json url --jq '.url' ${_input}); then
+  echo "Error: Unable to retrieve issue details" >&2
+  exit 1
+fi
 
-# Determine if an executable is in the PATH
-# if ! type -p ruby >/dev/null; then
-#   echo "Ruby not found on the system" >&2
-#   exit 1
-# fi
+# Pull out some URL parts for re-use.
+_nwo=${_url#https://github.com/}
+_nwo=${_nwo%%/issues/*}
+_num=${_url##*/}
 
-# Pass arguments through to another command
-# gh issue list "$@" -R cli/cli
+# Get the issue body and comments as $_blob.
+_blob=$(gh issue view --json title,body,comments ${_url})
 
-# Using the gh api command to retrieve and format information
-# QUERY='
-#   query($endCursor: String) {
-#     viewer {
-#       repositories(first: 100, after: $endCursor) {
-#         nodes {
-#           nameWithOwner
-#           stargazerCount
-#         }
-#       }
-#     }
-#   }
-# '
-# TEMPLATE='
-#   {{- range $repo := .data.viewer.repositories.nodes -}}
-#     {{- printf "name: %s - stargazers: %v\n" $repo.nameWithOwner $repo.stargazerCount -}}
-#   {{- end -}}
-# '
-# exec gh api graphql -f query="${QUERY}" --paginate --template="${TEMPLATE}"
+# List issue URLs from the body and comments, as $LinksTo.
+LinksTo="$(printf "%s\n" "${_blob}" | \
+  sed -e 's/https/\nhttps/g'| \
+  grep -Eo 'https://github.com/[^/]+/[^/]+/issues/[0-9]+'| \
+  sort -u)"
+
+# List issues that cross-reference this one, as $LinkedFrom.
+_api="/repos/${_nwo}/issues/${_num}/timeline"
+LinkedFrom="$(gh api \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  ${_api} \
+  -q 'map(select(.event == "cross-referenced"))
+      | .[].source.issue.html_url' | \
+  sort -u)"
+
+# Print the results.
+echo "Links to:"
+printf "%s\n" "${LinksTo}"
+echo
+echo "Linked from:"
+printf "%s\n" "${LinkedFrom}"
