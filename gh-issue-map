@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 set -e
 
+# Handle arguments --verbose, -v, --help, and -h.
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --verbose | -v)
+      _verbose=true
+      shift
+      ;;
+    --help | -h)
+      echo "Usage: $(basename $0) [--verbose] [--help] <issue>"
+      exit 0
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+# Get the issue number or URL from the next argument.
 _input="$1"
 
 # Get the issue URL as $_url. Error if bad input or user lacks access.
