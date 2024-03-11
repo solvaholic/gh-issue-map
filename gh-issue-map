@@ -9,8 +9,13 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --help | -h)
-      echo "Usage: $(basename $0) [--verbose] [--help] <issue>"
+      echo "Usage: $(basename $0) [flags] <issue#|url>"
+      echo "  Flags: --help, --verbose, --table"
       exit 0
+      ;;
+    --table)
+      _output=table
+      shift
       ;;
     *)
       break
@@ -27,7 +32,7 @@ if ! _url=$(gh issue view --json url --jq '.url' ${_input}); then
   exit 1
 fi
 
-# Pull out some URL parts for re-use.
+# Grab some URL parts for re-use.
 _nwo=${_url#https://github.com/}
 _nwo=${_nwo%%/issues/*}
 _num=${_url##*/}
@@ -52,11 +57,32 @@ LinkedFrom="$(gh api \
   sort -u)"
 
 # Print the results.
-if [ -n "${LinksTo}" ]; then
-  echo "Links to:"
-  printf "%s\n\n" "${LinksTo}"
-fi
-if [ -n "${LinkedFrom}" ]; then
-  echo "Linked from:"
-  printf "%s\n\n" "${LinkedFrom}"
+if [ -n "${LinksTo}" ] || [ -n "${LinkedFrom}" ]; then
+  lenL=$(wc -l <<< "${LinksTo}")
+  lenR=$(wc -l <<< "${LinkedFrom}")
+  lenMax=$(($lenL > $lenR ? $lenL : $lenR))
+  case "${_output}" in
+    table)
+      # Print the results as a Markdown table.
+      printf "| Links To | Linked From |\n"
+      printf "|----------|-------------|\n"
+      for ((i=1; i<=lenMax; i++)); do
+        linkTo=$(sed -n "${i}p" <<< "${LinksTo}")
+        linkedFrom=$(sed -n "${i}p" <<< "${LinkedFrom}")
+        printf "| %-8s | %-11s |\n" "${linkTo}" "${linkedFrom}"
+      done
+      ;;
+    *)
+      if [ -n "${LinksTo}" ]; then
+        echo "Links to:"
+        printf "%s\n\n" "${LinksTo}"
+      fi
+      if [ -n "${LinkedFrom}" ]; then
+        echo "Linked from:"
+        printf "%s\n\n" "${LinkedFrom}"
+      fi
+      ;;
+  esac
+else
+  echo "No links found"
 fi
