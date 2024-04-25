@@ -64,8 +64,8 @@ if [ -n "${LinksTo}" ] || [ -n "${LinkedFrom}" ]; then
   case "${_output}" in
     table)
       # Print the results as a Markdown table.
-      printf "| Links To | Linked From |\n"
-      printf "|----------|-------------|\n"
+      printf "| LinksTo | LinkedFrom |\n"
+      printf "| ------- | ---------- |\n"
       for ((i=1; i<=lenMax; i++)); do
         linkTo=$(sed -n "${i}p" <<< "${LinksTo}")
         linkedFrom=$(sed -n "${i}p" <<< "${LinkedFrom}")
