@@ -1,24 +1,34 @@
 # gh-issue-map
 
-:construction: This is a work in progress :construction:
+> **⚠️ ARCHIVED: This project has been superseded by [solvaholic/gh-issue-miner](https://github.com/solvaholic/gh-issue-miner)**
+>
+> Please use [gh-issue-miner](https://github.com/solvaholic/gh-issue-miner) instead. This repository is no longer maintained.
 
-This project provides a means of mapping a GitHub issue's relationships to other GitHub issues. For convenience it is installable as a [gh](https://cli.github.com/) extension.
+---
 
-## Installing
+## Migrating to gh-issue-miner
 
-Install and test with the following commands:
+To install the replacement extension:
+
+```shell
+gh extension install solvaholic/gh-issue-miner
+```
+
+For more information, visit: https://github.com/solvaholic/gh-issue-miner
+
+---
+
+## Historical Information
+
+This project provided a means of mapping a GitHub issue's relationships to other GitHub issues. It was installable as a [gh](https://cli.github.com/) extension.
+
+### Previous Installation
 
 ```shell
 gh extension install solvaholic/gh-issue-map
 ```
 
-## Upgrading
-
-```shell
-gh extension upgrade gh-issue-map
-```
-
-## Usage
+### Previous Usage
 
     Usage:
       gh issue-map [flags] <issue#|url>
