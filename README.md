@@ -11,6 +11,7 @@
 To install the replacement extension:
 
 ```shell
+gh extension remove gh-issue-map
 gh extension install solvaholic/gh-issue-miner
 ```
 
